@@ -1,13 +1,14 @@
 const express = require("express");
 const { open } = require("sqlite");
-const sqlite = require("sqlite");
+const sqlite3 = require("sqlite3");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const databasePath = path.join((__dirname, "covid19IndiaPortal.db"));
+const databasePath = path.join(__dirname, "covid19IndiaPortal.db");
 
 const app = express();
+
 app.use(express.json());
 
 let database = null;
@@ -20,7 +21,7 @@ const initializeDbAndServer = async () => {
     });
 
     app.listen(3000, () =>
-      console.log("Server is Running at http://localhost:3000/")
+      console.log("Server Running at http://localhost:3000/")
     );
   } catch (error) {
     console.log(`DB Error: ${error.message}`);
@@ -30,7 +31,7 @@ const initializeDbAndServer = async () => {
 
 initializeDbAndServer();
 
-const convertStateObjectToResponse = (dbObject) => {
+const convertStateDbObjectToResponseObject = (dbObject) => {
   return {
     stateId: dbObject.state_id,
     stateName: dbObject.state_name,
@@ -38,11 +39,11 @@ const convertStateObjectToResponse = (dbObject) => {
   };
 };
 
-const convertDistrictObjectToResponse = (dbObject) => {
+const convertDistrictDbObjectToResponseObject = (dbObject) => {
   return {
     districtId: dbObject.district_id,
     districtName: dbObject.district_name,
-    stateId: dbObject.stateId,
+    stateId: dbObject.state_id,
     cases: dbObject.cases,
     cured: dbObject.cured,
     active: dbObject.active,
@@ -84,13 +85,14 @@ app.post("/login/", async (request, response) => {
       databaseUser.password
     );
     if (isPasswordMatched === true) {
-      const payload = { username: username };
-
-      const jwtToken = jwt.sign(payload, "MY SECRET_TOKEN");
+      const payload = {
+        username: username,
+      };
+      const jwtToken = jwt.sign(payload, "MY_SECRET_TOKEN");
       response.send({ jwtToken });
     } else {
       response.status(400);
-      response.send("Invalid Password");
+      response.send("Invalid password");
     }
   }
 });
